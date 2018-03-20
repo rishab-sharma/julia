@@ -1514,6 +1514,16 @@ end
 @deprecate_binding uninitialized undef
 @deprecate_binding Uninitialized UndefInitializer
 
+# Deprecate `similar(f, axes)`
+@noinline function similar(f, shape::Tuple) where {T}
+    depwarn("using similar(f, shape) to call `f` with axes `shape` is deprecated; call `f` directly and/or add methods such that it supports axes", :similar)
+    f(to_shape(shape))
+end
+@noinline function similar(f, dims::DimOrInd...) where {T}
+    depwarn("using similar(f, shape...) to call `f` with axes `shape` is deprecated; call `f` directly and/or add methods such that it supports axes", :similar)
+    f(to_shape(dims))
+end
+
 @deprecate showcompact(x) show(IOContext(stdout, :compact => true), x)
 @deprecate showcompact(io, x) show(IOContext(io, :compact => true), x)
 @deprecate sprint(::typeof(showcompact), args...) sprint(show, args...; context=:compact => true)
