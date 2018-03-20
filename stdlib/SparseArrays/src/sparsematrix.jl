@@ -1604,9 +1604,9 @@ end
 # and computing reductions along columns into SparseMatrixCSC is
 # non-trivial, so use Arrays for output
 Base.reducedim_initarray(A::SparseMatrixCSC, region, v0, ::Type{R}) where {R} =
-    fill!(similar(dims->Array{R}(undef, dims), Base.reduced_indices(A,region)), v0)
+    fill(v0, Base.reduced_indices(A,region))
 Base.reducedim_initarray0(A::SparseMatrixCSC, region, v0, ::Type{R}) where {R} =
-    fill!(similar(dims->Array{R}(undef, dims), Base.reduced_indices0(A,region)), v0)
+    fill(v0, Base.reduced_indices0(A,region))
 
 # General mapreduce
 function _mapreducezeros(f, op, ::Type{T}, nzeros::Int, v0) where T
@@ -1820,7 +1820,7 @@ function _findr(op, A, region, Tv)
             throw(ArgumentError("array slices must be non-empty"))
         else
             ri = Base.reduced_indices0(A, region)
-            return (similar(A, ri), similar(dims->zeros(Ti, dims), ri))
+            return (similar(A, ri), zeros(Ti, ri))
         end
     end
 
