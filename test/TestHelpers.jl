@@ -105,9 +105,9 @@ Base.reshape(A::AbstractArray, inds::Tuple{UnitRange,Vararg{UnitRange}}) = Offse
 Base.fill(v, inds::NTuple{N, AbstractUnitRange}) where{N} =
     fill!(OffsetArray(Array{typeof(v), N}(undef, map(length, inds)), map(indsoffset, inds)), v)
 Base.AbstractArray{T}(::UndefInitializer, inds::NTuple{N,AbstractUnitRange}) where {T,N} =
-    OffsetArray(Array{typeof(v), N}(undef, map(length, inds)), map(indsoffset, inds))
+    OffsetArray(Array{T, N}(undef, map(length, inds)), map(indsoffset, inds))
 Base.AbstractArray{T,N}(::UndefInitializer, inds::NTuple{N,AbstractUnitRange}) where {T,N} =
-    OffsetArray(Array{typeof(v), N}(undef, map(length, inds)), map(indsoffset, inds))
+    OffsetArray(Array{T, N}(undef, map(length, inds)), map(indsoffset, inds))
 
 @inline function Base.getindex(A::OffsetArray{T,N}, I::Vararg{Int,N}) where {T,N}
     checkbounds(A, I...)

@@ -18,22 +18,25 @@ convert(::Type{AbstractArray{T,N}}, a::AbstractArray{<:Any,N}) where {T,N} = Abs
 to_axis(d::Integer) = OneTo(d)
 to_axis(d::AbstractUnitRange) = d
 
-## AbstractArray constructors: Gather args into a `AbstractArray{T,N}(undef, ::Tuple)` method
-AbstractArray{T}(::UndefInitializer, dims::Vararg{DimOrInd,N}) where {T,N} = AbstractArray{T,N}(undef, dims)
-AbstractArray{T}(::UndefInitializer, dims::NTuple{N,DimOrInd}) where {T,N} = AbstractArray{T,N}(undef, dims)
-AbstractArray{T,N}(::UndefInitializer, dims::Vararg{DimOrInd,N}) where {T,N} = AbstractArray{T,N}(undef, dims)
+# AbstractArray constructors: Gather args into a `AbstractArray{T,N}(undef, ::Tuple)` method
+AbstractArray{T}(::UndefInitializer, dims::Vararg{Integer,N}) where {T,N} = AbstractArray{T,N}(undef, dims)
+AbstractArray{T}(::UndefInitializer, dims::NTuple{N,Integer}) where {T,N} = AbstractArray{T,N}(undef, dims)
 
 AbstractArray{T,N}(::UndefInitializer, dims::NTuple{N,Integer}) where {T,N} = Array{T,N}(undef, dims)
 AbstractArray{Bool,N}(::UndefInitializer, dims::NTuple{N,Integer}) where {N} = BitArray{N}(undef, dims...)
 
 if nameof(@__MODULE__) === :Base  # avoid method overwrite with Core
-    # Add definitions supporting OneTo axes in Base
+    # Add definitions supporting axes in Base alone
+    AbstractArray{T}(::UndefInitializer, dims::Vararg{DimOrInd,N}) where {T,N} = AbstractArray{T,N}(undef, dims)
+    AbstractArray{T}(::UndefInitializer, dims::NTuple{N,DimOrInd}) where {T,N} = AbstractArray{T,N}(undef, dims)
+    AbstractArray{T,N}(::UndefInitializer, dims::Vararg{DimOrInd,N}) where {T,N} = AbstractArray{T,N}(undef, dims)
+
     AbstractArray{T,N}(::UndefInitializer, dims::NTuple{N,Union{Integer, OneTo}}) where {T,N} = AbstractArray{T,N}(undef, map(to_axis, dims))
 
     AbstractArray{T,N}(::UndefInitializer, dims::NTuple{N,OneTo}) where {T,N} = Array{T,N}(undef, map(last, dims))
-    AbstractArray{T,0}(::UndefInitializer, dims::Tuple{}) where {T} = Array{T,0}(undef, ())
+    AbstractArray{T,0}(::UndefInitializer, ::Tuple{}) where {T} = Array{T,0}(undef)
     AbstractArray{Bool,N}(::UndefInitializer, dims::NTuple{N,OneTo}) where {N} = BitArray{N}(undef, map(last, dims)...)
-    AbstractArray{Bool,0}(::UndefInitializer, dims::Tuple{}) where {} = BitArray{0}(undef)
+    AbstractArray{Bool,0}(::UndefInitializer, ::Tuple{}) where {} = BitArray{0}(undef)
 
     # catch undefined constructors before the deprecation kicks in
     # TODO: remove when deprecation is removed
