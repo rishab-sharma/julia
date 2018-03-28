@@ -19,17 +19,22 @@ Understanding how Julia answers these three questions is key to understanding pa
 
 ### The meaning of `X`
 
-Julia supports federated management of packages. This means that multiple independent parties can publish registries of packages with their names, versions, dependencies and other metadata. Organizations can have private packages and registries, which can depend on a mix of private and public packages. One consequence of federated packaging is that there is no central authority for package names. Different entities can and will use the same name to refer to different packages. This means that the dependenices of a single project, can end up disagreeing about which package a given name refers to. Julia's package loading mechanisms are designed to handle such situations without and issue.
+Julia supports federated management of packages. This means that multiple independent parties can publish registries of packages and their names, versions, dependencies, etc. Both packages and registries can be public or private. One consequence of federation is that there is no central authority for package names. Different entities can and will use the same name to refer to unrelated packages. This means that the dependenices of a single project, can end up disagreeing about what package a given name refers to. To handle this, Julia's package loading mechanism is designed to allow different components in the same Julia program to use a package name to refer to and load different packages.
 
-Since the decentralized naming problem is somewhat abstract, it may help to walk through a concrete scenario. Suppose you're developing an application that depends on two packages named `Priv` and `Pub` which are private and public, respectively. When you named `Priv` you weren't aware of any packages by that name. Subsequently, however, a package named `Priv` has been published (which helps manage system priveleges) and the `Pub` package has started to use it. When you next update `Pub` to get new features, your project will depend on two different packages named `Priv`: the original private one and the new public one. In order for your project to continue working, the expression `import Priv` must load different `Priv` packages depending on whether it occurs in your main application's source or in the source of the `Pub` package.
+Since the decentralized naming problem is somewhat abstract, it may help to walk through a concrete scenario. Suppose you're developing an application that depends on two packages named `Priv` and `Pub` which are private and public, respectively. When you named `Priv` there were no public packages with that name. Subsequently, however, a package named `Priv` has been published—let's say that it helps manage system priveleges—and the `Pub` package has started to use it. When you next upgrade `Pub` to get the latest features, your project will depend on two different packages named `Priv`: it depends directly on the original private one and indirectly, through `Pub`, on the the new public one. In order for your project to continue working, the expression `import Priv` must refer to and load different `Priv` packages depending on whether it occurs in your main application's source or in the source of the `Pub` package.
 
-The above scenario brings us to the first question that Julia must determine the answer to when evaluating `import X` (`using X` is the similar so we'll just write `import` from here): *What does `X` mean in this context?* The meaning of `X` is determined by a combination of three things:
+The above scenario brings us to the first question that Julia must answer to evaluate `import X`: *What does `X` mean in this context?* The meaning of `X` is determined by a combination of three things:
 
-1. The module in which the expression is evaluated
-2. The load path as determined by the contents of the `LOAD_PATH` global array
-3. The contents of each directory in the load path.
+1. The **module** in which the expression is evaluated;
+2. The **load path** as determined by the contents of the `LOAD_PATH` global array;
+3. The **contents** of each directory in the load path.
 
 
+
+
+
+
+------
 
 If the dependencies of a project needed share a single namespace, this would be a big problem for you if you ever tried to upgrade `Public` since you would then have two different packages named `Private` as dependencies of your project. With a shared package namespace, the the only real recourse is to rename your private package to something else. This situation is not hypthetical—it's been encountered repeatedly in the wild. 
 
