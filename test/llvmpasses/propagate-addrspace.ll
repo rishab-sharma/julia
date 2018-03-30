@@ -19,3 +19,22 @@ define i64 @twogeps() {
     %loaded = load i64, i64 addrspace(11)* %gep2
     ret i64 %loaded
 }
+
+define i64 @phi(i1 %cond) {
+; CHECK-LABEL: @phi
+; CHECK-NOT: addrspace(11)
+top:
+    %a = alloca i64
+    %b = alloca i64
+    %casteda = addrspacecast i64 *%a to i64 addrspace(11)*
+    %castedb = addrspacecast i64 *%b to i64 addrspace(11)*
+    br i1 %cond, label %brancha, label %bot
+
+brancha:
+    br label %bot
+
+bot:
+    %phiptr = phi i64 addrspace(11)* [ %casteda, %top ], [ %castedb, %brancha ]
+    %loaded = load i64, i64 addrspace(11)* %phiptr
+    ret i64 %loaded
+}
