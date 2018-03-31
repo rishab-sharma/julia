@@ -44,7 +44,7 @@ Cumulative sum of `A` along the dimension `dims`, storing the result in `B`. See
 cumsum!(B::AbstractArray{T}, A; dims::Integer) where {T} =
     accumulate!(ConvertOp{T}(+), B, A, dims=dims)
 
-function cumsum!(out, v::AbstractVector; dims::Integer=1)
+function cumsum!(out::AbstractArray, v::AbstractVector; dims::Integer=1)
     # we dispatch on the possibility of numerical stability issues
     _cumsum!(out, v, dims, ArithmeticStyle(eltype(out)))
 end
@@ -52,7 +52,7 @@ end
 function _cumsum!(out::AbstractArray{T}, v, dim, ::ArithmeticRounds) where {T}
     dim == 1 ? accumulate_pairwise!(ConvertOp{T}(+), out, v) : copyto!(out, v)
 end
-function _cumsum!(out, v, dim, ::ArithmeticUnknown)
+function _cumsum!(out::AbstractArray, v, dim, ::ArithmeticUnknown)
     _cumsum!(out, v, dim, ArithmeticRounds())
 end
 function _cumsum!(out::AbstractArray{T}, v, dim, ::ArithmeticStyle) where {T}
